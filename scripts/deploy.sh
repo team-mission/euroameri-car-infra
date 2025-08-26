@@ -112,8 +112,10 @@ if docker-compose ps | grep -q "Up" || docker compose ps | grep -q "running"; th
     success_msg "배포가 성공적으로 완료되었습니다!"
     echo ""
     echo "🌐 서비스 접속 정보:"
-    echo "   - 웹사이트: http://localhost"
-    echo "   - 백엔드 API: http://localhost/api"
+    echo "   - 웹사이트: http://localhost (포트 번호 없이 접속!)"
+    echo "   - 백엔드 API: http://localhost:4000"
+    echo ""
+    echo "🚨 중요: 프론트엔드는 http://localhost로, 백엔드는 http://localhost:4000으로 접속하세요!"
     echo ""
     echo "📊 컨테이너 상태 확인:"
     docker-compose ps || docker compose ps

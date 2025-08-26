@@ -1,19 +1,17 @@
-version: "3.8"
-
 services:
   # Nginx 프록시 서버
   nginx:
     image: nginx:alpine
     container_name: euroameri-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - backend
       - frontend
+      - backend
     networks:
       - euroameri-network
     restart: unless-stopped
@@ -25,22 +23,22 @@ services:
       dockerfile: Dockerfile
     container_name: euroameri-backend
     environment:
-      - NODE_ENV=${NODE_ENV:-production}
+      - NODE_ENV=${NODE_ENV:-development}
       - DB_HOST=${DB_HOST:-mysql}
       - DB_PORT=${DB_PORT:-3306}
       - DB_USERNAME=${DB_USERNAME:-euroameri}
-      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_PASSWORD=${DB_PASSWORD:-strong_password_123}
       - DB_NAME=${DB_NAME:-euroamericar}
       - CLIENT_URL=${CLIENT_URL:-http://localhost}
       - DOMAIN=${DOMAIN:-localhost}
       - SESSION_SECRET=${SESSION_SECRET:-change-this-secret}
     depends_on:
       - mysql
+    ports:
+      - "4000:4000"
     networks:
       - euroameri-network
     restart: unless-stopped
-    expose:
-      - "4000"
 
   # 프론트엔드 서비스
   frontend:
@@ -49,9 +47,10 @@ services:
       dockerfile: Dockerfile
     container_name: euroameri-frontend
     environment:
-      - NODE_ENV=development
-    ports:
-      - "3000:3000"
+      - NODE_ENV=${NODE_ENV:-development}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    expose:
+      - "3000"
     networks:
       - euroameri-network
     restart: unless-stopped
@@ -61,10 +60,10 @@ services:
     image: mysql:8.0
     container_name: euroameri-mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password_456}
       - MYSQL_DATABASE=${DB_NAME:-euroamericar}
       - MYSQL_USER=${DB_USERNAME:-euroameri}
-      - MYSQL_PASSWORD=${DB_PASSWORD:-password}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-strong_password_123}
       - MYSQL_CHARSET=utf8mb4
       - MYSQL_COLLATION=utf8mb4_unicode_ci
     volumes:
@@ -81,9 +80,12 @@ services:
       timeout: 20s
       retries: 10
 
+# 네트워크 설정
 networks:
   euroameri-network:
     driver: bridge
 
+# 볼륨 설정
 volumes:
   mysql_data:
+    driver: local

@@ -53,9 +53,11 @@ docker-compose up --build -d
 
 ### 3. 접속 정보
 
-- **웹사이트**: http://localhost
-- **API**: http://localhost/api/
+- **웹사이트**: http://localhost (포트 번호 없이 접속!)
+- **API**: http://localhost:4000
 - **MySQL**: localhost:3306
+
+> 🚨 **중요**: 프론트엔드는 `http://localhost`로, 백엔드 API는 `http://localhost:4000`으로 접속하세요!
 
 ## 🔄 업데이트
 
@@ -116,14 +118,14 @@ docker-compose up --build -d  # 새 버전으로 시작
 
 ### 라우팅 규칙
 
-- `/` → 프론트엔드 (Next.js, 포트 3000)
-- `/api/` → 백엔드 (Express.js, 포트 4000)
+- `http://localhost` → 프론트엔드 (Next.js, Nginx 프록시)
+- `http://localhost:4000` → 백엔드 (Express.js, 직접 접속)
 - 정적 파일은 캐싱 및 압축 적용
 
 ## 📋 관련 레포지토리
 
-- **백엔드**: [euroameri-car-back 레포지토리 URL]
-- **프론트엔드**: [euroameri-car-front 레포지토리 URL]
+- **백엔드**: https://github.com/team-mission/euroameri-car-back.git
+- **프론트엔드**: https://github.com/team-mission/euroameri-car-front.git
 - **인프라**: [이 레포지토리]
 
 ## 🛠️ 유지보수
