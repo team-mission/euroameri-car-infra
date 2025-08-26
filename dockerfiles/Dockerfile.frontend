@@ -1,0 +1,31 @@
+# Node.js 18 Alpine 이미지 사용
+FROM node:18-alpine
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 패키지 매니저를 위한 yarn 설치
+RUN corepack enable
+
+# package.json과 yarn.lock 복사
+COPY package.json yarn.lock ./
+
+# 의존성 설치
+RUN yarn install
+
+# 전체 소스 코드 복사
+COPY . .
+
+# Next.js 빌드 (프로덕션용)
+# 개발 환경에서는 주석 처리하고 dev 명령어 사용
+# RUN yarn build
+
+# 포트 노출
+EXPOSE 3000
+
+# 헬스체크 제거 (개발 환경)
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD curl -f http://localhost:3000 || exit 1
+
+# 개발 환경에서는 dev, 프로덕션에서는 start 사용
+CMD ["yarn", "dev"]

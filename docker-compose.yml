@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+  # Nginx 프록시 서버
+  nginx:
+    image: nginx:alpine
+    container_name: euroameri-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - euroameri-network
+    restart: unless-stopped
+
+  # 백엔드 서비스
+  backend:
+    build:
+      context: ./euroameri-car-back
+      dockerfile: Dockerfile
+    container_name: euroameri-backend
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - DB_HOST=${DB_HOST:-mysql}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USERNAME=${DB_USERNAME:-euroameri}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-euroamericar}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost}
+      - DOMAIN=${DOMAIN:-localhost}
+      - SESSION_SECRET=${SESSION_SECRET:-change-this-secret}
+    depends_on:
+      - mysql
+    networks:
+      - euroameri-network
+    restart: unless-stopped
+    expose:
+      - "4000"
+
+  # 프론트엔드 서비스
+  frontend:
+    build:
+      context: ./euroameri-car-front
+      dockerfile: Dockerfile
+    container_name: euroameri-frontend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    networks:
+      - euroameri-network
+    restart: unless-stopped
+
+  # MySQL 데이터베이스
+  mysql:
+    image: mysql:8.0
+    container_name: euroameri-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DB_NAME:-euroamericar}
+      - MYSQL_USER=${DB_USERNAME:-euroameri}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-password}
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    networks:
+      - euroameri-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+networks:
+  euroameri-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
