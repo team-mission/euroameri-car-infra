@@ -190,10 +190,10 @@ status() {
     # 연결 테스트
     echo "🌐 서비스 연결 테스트:"
     
-    if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|404"; then
-        success_msg "웹사이트 (Nginx): http://localhost ✓"
+    if curl -s -k -o /dev/null -w "%{http_code}" https://localhost | grep -q "200\|404"; then
+        success_msg "웹사이트 (Nginx HTTPS): https://localhost ✓"
     else
-        warn_msg "웹사이트 (Nginx): http://localhost ✗"
+        warn_msg "웹사이트 (Nginx HTTPS): https://localhost ✗"
     fi
     
     if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 | grep -q "200\|404"; then
@@ -335,7 +335,8 @@ help() {
     echo "  logs nginx      Nginx 로그만 확인"
     echo ""
     echo "🌐 접속 정보:"
-    echo "  웹사이트: http://localhost (포트 번호 없이!)"
+    echo "  웹사이트 (HTTPS): https://localhost (권장)"
+    echo "  웹사이트 (HTTP): http://localhost (자동으로 HTTPS로 리다이렉트)"
     echo "  프론트엔드: http://localhost:3000"
     echo "  백엔드 API: http://localhost:4000"
     echo "  MySQL: localhost:3306"
