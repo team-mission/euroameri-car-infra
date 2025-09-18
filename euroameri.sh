@@ -13,6 +13,23 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Docker Compose 명령어 찾기
+if command -v docker-compose >/dev/null 2>&1; then
+    DOCKER_COMPOSE="docker-compose"
+elif command -v /usr/bin/docker-compose >/dev/null 2>&1; then
+    DOCKER_COMPOSE="/usr/bin/docker-compose"
+elif command -v /usr/local/bin/docker-compose >/dev/null 2>&1; then
+    DOCKER_COMPOSE="/usr/local/bin/docker-compose"
+elif docker compose version >/dev/null 2>&1; then
+    DOCKER_COMPOSE="docker compose"
+else
+    echo "❌ Docker Compose를 찾을 수 없습니다."
+    echo "다음 중 하나를 설치해주세요:"
+    echo "  - docker-compose"
+    echo "  - Docker Desktop (docker compose 플러그인 포함)"
+    exit 1
+fi
+
 # Git 레포지토리 URL
 BACKEND_REPO="https://github.com/team-mission/euroameri-car-back.git"
 FRONTEND_REPO="https://github.com/team-mission/euroameri-car-front.git"
@@ -91,26 +108,26 @@ start() {
     check_docker
     
     # MySQL이 실행 중인지 확인
-    if ! docker-compose ps mysql | grep -q "Up"; then
+    if ! $DOCKER_COMPOSE ps mysql | grep -q "Up"; then
         info_msg "MySQL을 먼저 시작합니다..."
-        docker-compose up -d mysql
+        $DOCKER_COMPOSE up -d mysql
         sleep 20
     fi
     
     # 초기화 스크립트가 실행되었는지 확인
     info_msg "데이터베이스 초기화 상태를 확인합니다..."
-    if ! docker-compose exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT COUNT(*) FROM admin;" > /dev/null 2>&1; then
+    if ! $DOCKER_COMPOSE exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT COUNT(*) FROM admin;" > /dev/null 2>&1; then
         warn_msg "초기화 스크립트가 실행되지 않았을 수 있습니다. MySQL을 재시작합니다..."
-        docker-compose restart mysql
+        $DOCKER_COMPOSE restart mysql
         sleep 25
     fi
     
-    docker-compose up --build -d
+    $DOCKER_COMPOSE up --build -d
     
     # 초기 데이터 확인
     sleep 10
     info_msg "초기 데이터 로드를 확인합니다..."
-    if docker-compose exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT COUNT(*) as admin_count FROM admin; SELECT COUNT(*) as post_count FROM post;" 2>/dev/null; then
+    if $DOCKER_COMPOSE exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT COUNT(*) as admin_count FROM admin; SELECT COUNT(*) as post_count FROM post;" 2>/dev/null; then
         success_msg "초기 데이터가 정상적으로 로드되었습니다."
     fi
     
@@ -131,17 +148,17 @@ fresh_start() {
     fi
     
     info_msg "모든 컨테이너와 볼륨을 정리합니다..."
-    docker-compose down -v --remove-orphans 2>/dev/null || true
+    $DOCKER_COMPOSE down -v --remove-orphans 2>/dev/null || true
     
     info_msg "MySQL부터 단계별로 시작합니다..."
-    docker-compose up -d mysql
+    $DOCKER_COMPOSE up -d mysql
     
     info_msg "MySQL 초기화를 기다립니다..."
     sleep 30
     
     info_msg "데이터베이스 초기화 스크립트 실행을 확인합니다..."
     # MySQL 초기화 확인
-    if docker-compose exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT COUNT(*) FROM admin;" > /dev/null 2>&1; then
+    if $DOCKER_COMPOSE exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT COUNT(*) FROM admin;" > /dev/null 2>&1; then
         success_msg "데이터베이스 초기화 스크립트가 성공적으로 실행되었습니다."
     else
         warn_msg "초기화 스크립트 실행 중... 조금 더 기다립니다."
@@ -149,16 +166,16 @@ fresh_start() {
     fi
     
     info_msg "백엔드를 시작합니다..."
-    docker-compose up -d backend
+    $DOCKER_COMPOSE up -d backend
     sleep 20
     
     info_msg "전체 서비스를 시작합니다..."
-    docker-compose up -d
+    $DOCKER_COMPOSE up -d
     sleep 10
     
     # 초기 데이터 확인
     info_msg "초기 데이터를 확인합니다..."
-    if docker-compose exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT title FROM post LIMIT 1;" > /dev/null 2>&1; then
+    if $DOCKER_COMPOSE exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "SELECT title FROM post LIMIT 1;" > /dev/null 2>&1; then
         success_msg "초기 데이터가 정상적으로 로드되었습니다."
     else
         warn_msg "초기 데이터 로드에 문제가 있을 수 있습니다."
@@ -170,7 +187,7 @@ fresh_start() {
 # 정지
 stop() {
     title_msg "서비스를 정지합니다..."
-    docker-compose down
+    $DOCKER_COMPOSE down
     success_msg "서비스 정지 완료!"
 }
 
@@ -184,7 +201,7 @@ status() {
     fi
     
     echo "📊 컨테이너 상태:"
-    docker-compose ps
+    $DOCKER_COMPOSE ps
     echo ""
     
     # 연결 테스트
@@ -226,24 +243,24 @@ logs() {
     
     if [ -z "$2" ]; then
         echo "전체 로그 (Ctrl+C로 종료):"
-        docker-compose logs -f
+        $DOCKER_COMPOSE logs -f
     else
         case "$2" in
             backend|back|be)
                 echo "백엔드 로그 (Ctrl+C로 종료):"
-                docker-compose logs -f backend
+                $DOCKER_COMPOSE logs -f backend
                 ;;
             frontend|front|fe)
                 echo "프론트엔드 로그 (Ctrl+C로 종료):"
-                docker-compose logs -f frontend
+                $DOCKER_COMPOSE logs -f frontend
                 ;;
             mysql|db)
                 echo "MySQL 로그 (Ctrl+C로 종료):"
-                docker-compose logs -f mysql
+                $DOCKER_COMPOSE logs -f mysql
                 ;;
             nginx)
                 echo "Nginx 로그 (Ctrl+C로 종료):"
-                docker-compose logs -f nginx
+                $DOCKER_COMPOSE logs -f nginx
                 ;;
             *)
                 echo "사용법: ./euroameri.sh logs [backend|frontend|mysql|nginx]"
@@ -255,7 +272,7 @@ logs() {
 # 재시작
 restart() {
     title_msg "서비스를 재시작합니다..."
-    docker-compose restart
+    $DOCKER_COMPOSE restart
     show_status
 }
 
@@ -290,7 +307,7 @@ db_check() {
     fi
     
     echo "📊 데이터베이스 정보:"
-    docker-compose exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "
+    $DOCKER_COMPOSE exec -T mysql mysql -u euroameri -pstrong_password_123 euroamericar -e "
         SELECT 'Admin 계정' as 테이블, COUNT(*) as 개수 FROM admin
         UNION ALL
         SELECT 'Post 게시물', COUNT(*) FROM post
