@@ -33,6 +33,7 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 
 # 세션 시크릿 (개발용)
 SESSION_SECRET=euroameri_development_secret_key
+COOKIE_SECRET=euroameri_development_cookie_secret
 EOF
 
 echo "✅ 개발환경 .env 파일이 생성되었습니다!"

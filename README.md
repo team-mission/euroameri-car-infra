@@ -27,28 +27,30 @@ euroameri-car-infra/
 
 ## 🚀 빠른 시작
 
-### 1. 초기 설정
+### 간단한 통합 스크립트 사용
 
 ```bash
 # 1. 이 레포지토리 클론
 git clone <이-레포지토리-URL> euroameri-car-infra
 cd euroameri-car-infra
 
-# 2. 초기 설정 실행 (백엔드/프론트엔드 레포지토리 클론)
-./setup.sh
+# 2. 모든 것을 한 번에!
+./euroameri.sh setup && ./euroameri.sh start
 
-# 3. 환경 변수 설정 (필요한 경우 .env 파일 수정)
-cp env.example .env
+# 또는 단계별로:
+./euroameri.sh setup    # 초기 설정
+./euroameri.sh start    # 서비스 시작
 ```
 
-### 2. 서비스 실행
+### 주요 명령어
 
 ```bash
-# 전체 서비스 시작
-./scripts/start.sh
-
-# 또는 직접 실행
-docker-compose up --build -d
+./euroameri.sh start     # 서비스 시작
+./euroameri.sh stop      # 서비스 정지
+./euroameri.sh fresh     # 완전 초기화 후 시작
+./euroameri.sh status    # 상태 확인
+./euroameri.sh logs      # 로그 확인
+./euroameri.sh update    # 코드 업데이트
 ```
 
 ### 3. 접속 정보
@@ -59,48 +61,41 @@ docker-compose up --build -d
 
 > 🚨 **중요**: 프론트엔드는 `http://localhost`로, 백엔드 API는 `http://localhost:4000`으로 접속하세요!
 
-## 🔄 업데이트
+## 🔄 사용 예시
 
-### 코드 업데이트
+### 일반적인 개발 흐름
 
 ```bash
-# 백엔드/프론트엔드 레포지토리 업데이트
-./update-repos.sh
+# 매일 작업 시작
+./euroameri.sh update     # 최신 코드 가져오기
+./euroameri.sh start      # 서비스 시작
 
-# 서비스 재시작
-docker-compose up --build -d
+# 문제가 생겼을 때
+./euroameri.sh status     # 상태 확인
+./euroameri.sh logs backend  # 백엔드 로그 확인
+./euroameri.sh restart    # 재시작
+
+# 완전히 초기화가 필요할 때
+./euroameri.sh fresh      # 모든 데이터 초기화 후 재시작
+
+# 작업 종료
+./euroameri.sh stop       # 서비스 정지
 ```
 
-### 인프라 설정 업데이트
+### 문제 해결
 
 ```bash
-# 이 레포지토리 업데이트
-git pull
+# 단계별 로그 확인
+./euroameri.sh logs           # 전체 로그
+./euroameri.sh logs backend   # 백엔드만
+./euroameri.sh logs frontend  # 프론트엔드만
+./euroameri.sh logs mysql     # MySQL만
 
-# 서비스 재시작
-docker-compose down
-docker-compose up --build -d
-```
+# 상태 및 연결 테스트
+./euroameri.sh status
 
-## 🔧 개발 워크플로우
-
-### 1. 로컬 개발
-
-```bash
-# 개발자 각자의 로컬 환경에서
-./setup.sh          # 최초 한 번만
-./update-repos.sh    # 코드 업데이트 시
-./scripts/start.sh   # 서비스 시작
-```
-
-### 2. 프로덕션 배포
-
-```bash
-# 서버에서
-git pull                    # 인프라 설정 업데이트
-./update-repos.sh          # 애플리케이션 코드 업데이트
-docker-compose down        # 기존 서비스 중지
-docker-compose up --build -d  # 새 버전으로 시작
+# 완전 초기화 (DB 포함)
+./euroameri.sh fresh
 ```
 
 ## 🏗️ 아키텍처

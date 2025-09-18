@@ -33,6 +33,7 @@ NEXT_PUBLIC_API_URL=https://euroamericar.com
 
 # 세션 시크릿 (프로덕션용 - 실제 배포시 반드시 변경)
 SESSION_SECRET=euroameri_production_secret_key_change_this_in_real_deployment
+COOKIE_SECRET=euroameri_production_cookie_secret_change_this_in_real_deployment
 EOF
 
 echo "✅ 프로덕션환경 .env 파일이 생성되었습니다!"

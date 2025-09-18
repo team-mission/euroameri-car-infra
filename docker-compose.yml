@@ -32,6 +32,10 @@ services:
       - CLIENT_URL=${CLIENT_URL:-http://localhost}
       - DOMAIN=${DOMAIN:-localhost}
       - SESSION_SECRET=${SESSION_SECRET:-change-this-secret}
+      - COOKIE_SECRET=${COOKIE_SECRET:-change-this-cookie-secret}
+      - MYSQL_HOSTNAME=mysql
+      - FORCE_IPV4=true
+      - UV_THREADPOOL_SIZE=4
     depends_on:
       - mysql
     ports:
@@ -49,8 +53,8 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:4000}
-    expose:
-      - "3000"
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
     networks:
       - euroameri-network
     restart: unless-stopped
