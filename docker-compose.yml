@@ -62,9 +62,9 @@ services:
       - euroameri-network
     restart: unless-stopped
 
-  # MySQL 데이터베이스
+  # MySQL 데이터베이스 (MariaDB - 호환성 개선)
   mysql:
-    image: mysql:8.0
+    image: mariadb:10.6
     container_name: euroameri-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password_456}
